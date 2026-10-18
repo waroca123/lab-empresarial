@@ -27,13 +27,12 @@ jobs:
 
           echo "HTTP: ${HTTP_CODE}"
           echo "=== RESPUESTA DE CPANEL ==="
-cat /tmp/update-response.txt
-echo
-echo "=== FIN RESPUESTA ==="
+          cat /tmp/update-response.txt
+          echo
+          echo "=== FIN RESPUESTA ==="
 
           if [ "${HTTP_CODE}" -lt 200 ] || [ "${HTTP_CODE}" -ge 300 ]; then
             echo "ERROR actualizando el repositorio."
-            cat /tmp/update-response.txt
             exit 1
           fi
 
@@ -56,9 +55,10 @@ echo "=== FIN RESPUESTA ==="
             "https://${CPANEL_HOST}:2083/execute/VersionControlDeployment/create")
 
           echo "HTTP: ${HTTP_CODE}"
-
+          echo "=== RESPUESTA DEL DEPLOYMENT ==="
           cat /tmp/deploy-response.txt
           echo
+          echo "=== FIN RESPUESTA ==="
 
           if [ "${HTTP_CODE}" -lt 200 ] || [ "${HTTP_CODE}" -ge 300 ]; then
             echo "ERROR iniciando el deployment."
