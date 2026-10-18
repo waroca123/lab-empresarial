@@ -26,6 +26,10 @@ jobs:
             "https://${CPANEL_HOST}:2083/execute/VersionControl/update")
 
           echo "HTTP: ${HTTP_CODE}"
+          echo "=== RESPUESTA DE CPANEL ==="
+cat /tmp/update-response.txt
+echo
+echo "=== FIN RESPUESTA ==="
 
           if [ "${HTTP_CODE}" -lt 200 ] || [ "${HTTP_CODE}" -ge 300 ]; then
             echo "ERROR actualizando el repositorio."
