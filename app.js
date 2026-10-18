@@ -6,6 +6,7 @@ const server = http.createServer((req, res) => {
     res.end(JSON.stringify({
         application: 'Desarrollo de Software Empresarial',
         status: 'running',
+        message: 'Comprobando el reinicio automatico despues del despliegue',
         node: process.version,
         environment: process.env.NODE_ENV || 'not-defined'
     }));
