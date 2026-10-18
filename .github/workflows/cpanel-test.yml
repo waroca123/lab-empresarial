@@ -1,31 +1,64 @@
-name: Diagnosticar Update from Remote por API
+name: Desplegar en cPanel
 
 on:
   workflow_dispatch:
 
 jobs:
-  update-cpanel:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Ejecutar VersionControl update
+      - name: Actualizar repositorio de cPanel
         env:
           CPANEL_HOST: ${{ secrets.CPANEL_HOST }}
           CPANEL_USER: ${{ secrets.CPANEL_USER }}
           CPANEL_TOKEN: ${{ secrets.CPANEL_TOKEN }}
         run: |
-          echo "=== VersionControl/update ==="
+          echo "Actualizando repositorio..."
 
-          curl \
-            --connect-timeout 15 \
-            --max-time 60 \
-            --show-error \
-            --include \
+          HTTP_CODE=$(curl --silent --show-error \
+            --output /tmp/update-response.txt \
+            --write-out "%{http_code}" \
             --request POST \
             -H "Authorization: cpanel ${CPANEL_USER}:${CPANEL_TOKEN}" \
             --data-urlencode "repository_root=/home/chfyhzlp/repos/lab-empresarial" \
             --data-urlencode "branch=main" \
-            "https://${CPANEL_HOST}:2083/execute/VersionControl/update"
+            "https://${CPANEL_HOST}:2083/execute/VersionControl/update")
 
+          echo "HTTP: ${HTTP_CODE}"
+
+          if [ "${HTTP_CODE}" -lt 200 ] || [ "${HTTP_CODE}" -ge 300 ]; then
+            echo "ERROR actualizando el repositorio."
+            cat /tmp/update-response.txt
+            exit 1
+          fi
+
+          echo "Repositorio actualizado."
+
+      - name: Desplegar HEAD en produccion
+        env:
+          CPANEL_HOST: ${{ secrets.CPANEL_HOST }}
+          CPANEL_USER: ${{ secrets.CPANEL_USER }}
+          CPANEL_TOKEN: ${{ secrets.CPANEL_TOKEN }}
+        run: |
+          echo "Iniciando deployment..."
+
+          HTTP_CODE=$(curl --silent --show-error \
+            --output /tmp/deploy-response.txt \
+            --write-out "%{http_code}" \
+            --request POST \
+            -H "Authorization: cpanel ${CPANEL_USER}:${CPANEL_TOKEN}" \
+            --data-urlencode "repository_root=/home/chfyhzlp/repos/lab-empresarial" \
+            "https://${CPANEL_HOST}:2083/execute/VersionControlDeployment/create")
+
+          echo "HTTP: ${HTTP_CODE}"
+
+          cat /tmp/deploy-response.txt
           echo
-          echo "=== Fin de respuesta ==="
+
+          if [ "${HTTP_CODE}" -lt 200 ] || [ "${HTTP_CODE}" -ge 300 ]; then
+            echo "ERROR iniciando el deployment."
+            exit 1
+          fi
+
+          echo "Deployment solicitado correctamente."
