@@ -1,0 +1,23 @@
+name: Probar conexion con cPanel
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-cpanel:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Comprobar conexion con la API de cPanel
+        env:
+          CPANEL_HOST: ${{ secrets.CPANEL_HOST }}
+          CPANEL_USER: ${{ secrets.CPANEL_USER }}
+          CPANEL_TOKEN: ${{ secrets.CPANEL_TOKEN }}
+        run: |
+          echo "Comprobando conexion con cPanel..."
+
+          RESPONSE=$(curl --silent --show-error --fail \
+            -H "Authorization: cpanel ${CPANEL_USER}:${CPANEL_TOKEN}" \
+            "https://${CPANEL_HOST}:2083/execute/Variables/get_user_information")
+
+          echo "$RESPONSE" | python3 -m json.tool
