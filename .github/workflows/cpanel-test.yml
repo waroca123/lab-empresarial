@@ -14,10 +14,15 @@ jobs:
           CPANEL_USER: ${{ secrets.CPANEL_USER }}
           CPANEL_TOKEN: ${{ secrets.CPANEL_TOKEN }}
         run: |
-          echo "Comprobando conexion con cPanel..."
+          echo "=== Diagnostico cPanel UAPI ==="
+          echo "Servidor: ${CPANEL_HOST}"
+          echo "Usuario: ${CPANEL_USER}"
+          echo "Probando HTTPS puerto 2083..."
 
-          RESPONSE=$(curl --silent --show-error --fail \
+          curl \
+            --connect-timeout 15 \
+            --max-time 30 \
+            --show-error \
+            --include \
             -H "Authorization: cpanel ${CPANEL_USER}:${CPANEL_TOKEN}" \
-            "https://${CPANEL_HOST}:2083/execute/Variables/get_user_information")
-
-          echo "$RESPONSE" | python3 -m json.tool
+            "https://${CPANEL_HOST}:2083/execute/Variables/get_user_information"
