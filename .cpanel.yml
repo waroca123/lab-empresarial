@@ -2,4 +2,5 @@
 deployment:
   tasks:
     - export DEPLOYPATH=/home/chfyhzlp/lab.practicasena.top/
+    - /bin/cp app.js $DEPLOYPATH
     - /bin/cp README.md $DEPLOYPATH
