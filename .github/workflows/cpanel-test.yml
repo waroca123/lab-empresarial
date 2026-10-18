@@ -26,17 +26,32 @@ jobs:
             "https://${CPANEL_HOST}:2083/execute/VersionControl/update")
 
           echo "HTTP: ${HTTP_CODE}"
-          echo "=== RESPUESTA DE CPANEL ==="
           cat /tmp/update-response.txt
           echo
-          echo "=== FIN RESPUESTA ==="
 
           if [ "${HTTP_CODE}" -lt 200 ] || [ "${HTTP_CODE}" -ge 300 ]; then
-            echo "ERROR actualizando el repositorio."
+            echo "ERROR: fallo HTTP actualizando el repositorio."
             exit 1
           fi
 
-          echo "Repositorio actualizado."
+          if grep -qi "<!DOCTYPE html" /tmp/update-response.txt; then
+            echo "ERROR: cPanel bloqueo la solicitud de actualizacion."
+            exit 1
+          fi
+
+          if ! python3 -m json.tool /tmp/update-response.txt >/dev/null 2>&1; then
+            echo "ERROR: cPanel no devolvio JSON valido."
+            exit 1
+          fi
+
+          STATUS=$(python3 -c "import json; print(json.load(open('/tmp/update-response.txt')).get('status', 0))")
+
+          if [ "${STATUS}" != "1" ]; then
+            echo "ERROR: cPanel rechazo la actualizacion."
+            exit 1
+          fi
+
+          echo "Repositorio actualizado correctamente."
 
       - name: Desplegar HEAD en produccion
         env:
@@ -55,14 +70,29 @@ jobs:
             "https://${CPANEL_HOST}:2083/execute/VersionControlDeployment/create")
 
           echo "HTTP: ${HTTP_CODE}"
-          echo "=== RESPUESTA DEL DEPLOYMENT ==="
           cat /tmp/deploy-response.txt
           echo
-          echo "=== FIN RESPUESTA ==="
 
           if [ "${HTTP_CODE}" -lt 200 ] || [ "${HTTP_CODE}" -ge 300 ]; then
-            echo "ERROR iniciando el deployment."
+            echo "ERROR: fallo HTTP iniciando el deployment."
             exit 1
           fi
 
-          echo "Deployment solicitado correctamente."
+          if grep -qi "<!DOCTYPE html" /tmp/deploy-response.txt; then
+            echo "ERROR: la proteccion del servidor bloqueo el deployment desde GitHub Actions."
+            exit 1
+          fi
+
+          if ! python3 -m json.tool /tmp/deploy-response.txt >/dev/null 2>&1; then
+            echo "ERROR: cPanel no devolvio JSON valido."
+            exit 1
+          fi
+
+          STATUS=$(python3 -c "import json; print(json.load(open('/tmp/deploy-response.txt')).get('status', 0))")
+
+          if [ "${STATUS}" != "1" ]; then
+            echo "ERROR: cPanel rechazo el deployment."
+            exit 1
+          fi
+
+          echo "Deployment creado correctamente."
