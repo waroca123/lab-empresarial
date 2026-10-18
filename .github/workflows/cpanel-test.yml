@@ -1,4 +1,4 @@
-name: Probar Update from Remote por API
+name: Diagnosticar Update from Remote por API
 
 on:
   workflow_dispatch:
@@ -8,30 +8,24 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Actualizar repositorio de cPanel desde GitHub
+      - name: Ejecutar VersionControl update
         env:
           CPANEL_HOST: ${{ secrets.CPANEL_HOST }}
           CPANEL_USER: ${{ secrets.CPANEL_USER }}
           CPANEL_TOKEN: ${{ secrets.CPANEL_TOKEN }}
         run: |
-          echo "Actualizando repositorio de cPanel..."
+          echo "=== VersionControl/update ==="
 
-          RESPONSE=$(curl --silent --show-error \
+          curl \
+            --connect-timeout 15 \
+            --max-time 60 \
+            --show-error \
+            --include \
             --request POST \
             -H "Authorization: cpanel ${CPANEL_USER}:${CPANEL_TOKEN}" \
             --data-urlencode "repository_root=/home/chfyhzlp/repos/lab-empresarial" \
             --data-urlencode "branch=main" \
-            "https://${CPANEL_HOST}:2083/execute/VersionControl/update")
+            "https://${CPANEL_HOST}:2083/execute/VersionControl/update"
 
-          echo "$RESPONSE" | python3 -m json.tool
-
-          echo "$RESPONSE" | python3 -c '
-          import json,sys
-          r=json.load(sys.stdin)
-          result=r.get("result", {})
-          if result.get("status") != 1:
-              print("ERROR: cPanel no pudo actualizar el repositorio.")
-              print(result.get("errors"))
-              sys.exit(1)
-          print("OK: repositorio actualizado correctamente.")
-          '
+          echo
+          echo "=== Fin de respuesta ==="
