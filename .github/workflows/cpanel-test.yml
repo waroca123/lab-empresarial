@@ -1,28 +1,22 @@
-name: Probar conexion con cPanel
+name: Investigar API Git de cPanel
 
 on:
   workflow_dispatch:
 
 jobs:
-  test-cpanel:
+  investigar:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Comprobar conexion con la API de cPanel
+      - name: Consultar funciones UAPI disponibles
         env:
           CPANEL_HOST: ${{ secrets.CPANEL_HOST }}
           CPANEL_USER: ${{ secrets.CPANEL_USER }}
           CPANEL_TOKEN: ${{ secrets.CPANEL_TOKEN }}
         run: |
-          echo "=== Diagnostico cPanel UAPI ==="
-          echo "Servidor: ${CPANEL_HOST}"
-          echo "Usuario: ${CPANEL_USER}"
-          echo "Probando HTTPS puerto 2083..."
+          echo "=== Consultando funciones UAPI disponibles ==="
 
-          curl \
-            --connect-timeout 15 \
-            --max-time 30 \
-            --show-error \
-            --include \
+          curl --silent --show-error \
             -H "Authorization: cpanel ${CPANEL_USER}:${CPANEL_TOKEN}" \
-            "https://${CPANEL_HOST}:2083/execute/Variables/get_user_information"
+            "https://${CPANEL_HOST}:2083/execute/API/get_functions" \
+            | python3 -m json.tool
