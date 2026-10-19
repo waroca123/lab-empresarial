@@ -6,7 +6,7 @@ const server = http.createServer((req, res) => {
     res.end(JSON.stringify({
         application: 'Desarrollo de Software Empresarial',
         status: 'running',
-        message: 'PRUEBA DESPLIEGUE AUTOMATICO',
+        message: 'CI/CD FUNCIONANDO CORRECTAMENTE',
         node: process.version,
         environment: process.env.NODE_ENV || 'not-defined'
     }));
