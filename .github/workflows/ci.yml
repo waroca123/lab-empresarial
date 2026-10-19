@@ -26,3 +26,11 @@ jobs:
 
       - name: Verificar aplicación
         run: node --check app.js
+
+      - name: Desplegar en producción
+        if: github.event_name == 'push'
+        run: |
+          curl --fail --silent --show-error \
+            --request POST \
+            --header "x-deploy-secret: ${{ secrets.DEPLOY_SECRET }}" \
+            https://lab.practicasena.top/deploy
