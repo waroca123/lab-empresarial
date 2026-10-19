@@ -1,0 +1,13 @@
+{
+  "name": "lab-empresarial",
+  "version": "1.0.0",
+  "description": "Laboratorio de Desarrollo de Software Empresarial",
+  "private": true,
+  "main": "app.js",
+  "engines": {
+    "node": "24.x"
+  },
+  "dependencies": {
+    "fastify": "^5.0.0"
+  }
+}
